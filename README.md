@@ -1,6 +1,6 @@
 # Excel / CSV Cleaner — powered by Claude AI
 
-Drops the file in, Claude analyzes it, cleans it automatically, outputs a clean version. No configuration needed.
+Point it at a messy CSV or Excel file: it profiles the data, asks Claude for a cleaning plan as structured JSON (validated with Pydantic), applies the steps it can automate, and saves a cleaned copy.
 
 ## What it does
 
@@ -13,7 +13,7 @@ Drops the file in, Claude analyzes it, cleans it automatically, outputs a clean 
 ## Setup
 
 ```bash
-pip install anthropic pandas openpyxl pydantic
+pip install -r requirements.txt
 export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
@@ -26,6 +26,8 @@ python3 cleaner.py data.csv --out final_clean.csv
 ```
 
 ## Example output
+
+Illustrative run on a sample sales export:
 
 ```
 Loading sales_data.csv...
@@ -62,6 +64,14 @@ Saved cleaned file: cleaned_sales_data.csv
 
 Actions Claude suggests that need manual review are flagged as `[skipped — manual action needed]` so nothing is silently lost.
 
-## Fiverr use case
+## Tests
 
-Ideal for clients with messy exported data from CRMs, POS systems, or spreadsheets. Fast turnaround, no manual cleaning needed.
+```bash
+pytest -q
+```
+
+Tests run offline: the Claude call is mocked, so no API key is needed. CI runs flake8 and pytest on Python 3.9, 3.11 and 3.12.
+
+## Where this is useful
+
+Exported data from CRMs, POS systems and spreadsheets that needs a fast first-pass clean before analysis. The model is set in `MODEL` at the top of `cleaner.py`.

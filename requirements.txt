@@ -1,0 +1,4 @@
+anthropic>=0.40
+pandas>=1.5
+openpyxl>=3.1
+pydantic>=2

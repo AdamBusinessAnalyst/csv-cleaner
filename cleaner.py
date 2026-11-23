@@ -10,19 +10,23 @@ Usage:
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
+from typing import Iterable, List, Optional
 
 import anthropic
 import pandas as pd
 from pydantic import BaseModel
 
+MODEL = "claude-sonnet-5-5"
+
 # ── Models ────────────────────────────────────────────────────────────────────
 
 
 class CleaningPlan(BaseModel):
-    issues_found: list[str]
-    actions_taken: list[str]
+    issues_found: List[str]
+    actions_taken: List[str]
 
 
 # ── Analysis ──────────────────────────────────────────────────────────────────
@@ -74,12 +78,11 @@ Keep actions concrete and automatable. Examples:
 """
 
     resp = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=MODEL,
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    import json
     raw = resp.content[0].text.strip()
     # Strip markdown code block if present
     if raw.startswith("```"):
@@ -120,7 +123,7 @@ def apply_cleaning(df: pd.DataFrame, plan: CleaningPlan) -> pd.DataFrame:
                 print(f"  Lowercased: {col!r}")
 
         # Convert to datetime
-        elif "datetime" in a or "date" in a and "convert" in a:
+        elif "datetime" in a or ("date" in a and "convert" in a):
             col = _extract_column(action, df.columns)
             if col:
                 try:
@@ -166,9 +169,13 @@ def apply_cleaning(df: pd.DataFrame, plan: CleaningPlan) -> pd.DataFrame:
     return df
 
 
-def _extract_column(action: str, columns: list[str]) -> str | None:
-    for col in columns:
-        if col.lower() in action.lower() or f"'{col}'" in action or f'"{col}"' in action:
+def _extract_column(action: str, columns: Iterable[str]) -> Optional[str]:
+    cols = [str(c) for c in columns]
+    for col in cols:
+        if f"'{col}'" in action or f'"{col}"' in action:
+            return col
+    for col in sorted(cols, key=len, reverse=True):
+        if col.lower() in action.lower():
             return col
     return None
 
