@@ -70,7 +70,7 @@ Actions Claude suggests that need manual review are flagged as `[skipped — man
 pytest -q
 ```
 
-Tests run offline: the Claude call is mocked, so no API key is needed. CI runs flake8 and pytest on Python 3.9, 3.11 and 3.12.
+Tests run offline: the Claude call is mocked, so no API key is needed. CI runs flake8 and pytest on Python 3.10, 3.11 and 3.12 (also tested locally on 3.9).
 
 ## Where this is useful
 
